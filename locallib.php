@@ -224,7 +224,7 @@ function get_task_file($draftareaid, $usercontext) {
         throw new invalid_parameter_exception('Supplied file must be a zip file.');
     }
     global $CFG;
-    $url = $CFG->wwwroot.'/draftfile.php/'.$usercontext->id.'/user/draft/'.$draftareaid.'/'.$filename;
+    $url = moodle_url::make_draftfile_url($draftareaid, '/', $filename);
     return ['file' => $file, 'filename' => $filename, 'url' => $url];
 }
 
@@ -406,28 +406,6 @@ function save_task_and_according_files($question) {
     $record->filepath = '/';
     $record->filename = $filename;
     $record->filearea = PROFORMA_TASKZIP_FILEAREA;
-    $filesfordb[] = $record;
-
-    //Now create JNLP file
-    $filename = 'Gui.jnlp';
-    $newfilerecord = array(
-        'component' => 'question',
-        'filearea' => JNLP_FILE_AREA,
-        'itemid' => $question->id,
-        'contextid' => $question->context->id,
-        'filepath' => '/',
-        'filename' => $filename);
-    $fs->create_file_from_string($newfilerecord, get_jnlp_file());
-
-    $record = new stdClass();
-    $record->questionid = $question->id;
-    $record->fileid = 'jnlp';
-    $record->usedbygrader = 0;
-    $record->visibletostudents = 0;
-    $record->usagebylms = 'download';
-    $record->filepath = '/';
-    $record->filename = $filename;
-    $record->filearea = JNLP_FILE_AREA;
     $filesfordb[] = $record;
 
     $names = '';
@@ -844,8 +822,11 @@ function mangle_pathname($filename) {
     return $filename;
 }
 
-function get_jnlp_file() {
+function get_jnlp_file_url() {
     global $CFG;
-    //return $CFG->wwwroot . '/question/type/programmingtask/res/variability/Gui.jnlp';
+    return $CFG->wwwroot . '/question/type/programmingtask/res/variability/Gui.jnlp';
+}
+
+function get_jnlp_file() {
     return sprintf(JNLP_FILE_CONTENT, "http://localhost:8080/GrajaVariability/rest/instantiate");
 }

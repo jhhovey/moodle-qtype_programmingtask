@@ -62,66 +62,6 @@ class qtype_programmingtask_renderer extends qtype_renderer {
         $PAGE->requires->js($plugindirrel . '/ace/ext-language_tools.js');
         $PAGE->requires->js($plugindirrel . '/ace/ext-modelist.js');
 
-        // If teacher, display test option for download.
-        if (has_capability('mod/quiz:grade', $PAGE->context)) {
-            $fs = get_file_storage();
-            $draftitemid = file_get_unused_draft_itemid();
-            file_prepare_draft_area($draftitemid, $question->contextid, 'question', 'jnlp', 1);
-            $jnlp_file_info = array(
-                'contextid' => $question->contextid,
-                'component' => 'question',
-                'filearea' => 'jnlp',
-                'itemid' => $draftitemid,
-                'filepath' => '/',
-                'filename' => 'Gui.jnlp');
-            if ($fs->file_exists($jnlp_file_info['contextid'],
-                $jnlp_file_info['component'],
-                $jnlp_file_info['filearea'],
-                $jnlp_file_info['itemid'],
-                $jnlp_file_info['filepath'],
-                $jnlp_file_info['filename'])) {
-                $fs->get_file(
-                    $jnlp_file_info['contextid'],
-                    $jnlp_file_info['component'],
-                    $jnlp_file_info['filearea'],
-                    $jnlp_file_info['itemid'],
-                    $jnlp_file_info['filepath'],
-                    $jnlp_file_info['filename'])->delete();
-            }
-            $jnlp_file = $fs->create_file_from_string($jnlp_file_info, get_jnlp_file());
-            $filesystem = $fs->get_file_system();
-            $location = $filesystem->get_local_path_from_storedfile($jnlp_file, true);
-            $filerecord = $DB->get_record('files', ['id' => $jnlp_file->get_id()]);
-            $url = moodle_url::make_pluginfile_url($filerecord->contextid, $filerecord->component,
-                $filerecord->filearea, $filerecord->itemid, $filerecord->filepath,
-                $filerecord->filename, true);
-            /*$url = moodle_url::make_pluginfile_url($jnlp_file->get_contextid(), $jnlp_file->get_component(),
-                $jnlp_file->get_filearea(), $jnlp_file->get_itemid(), $jnlp_file->get_filepath(),
-                $jnlp_file->get_filename(), true);*/
-            $o .= "<a href='$url' style='display:block;text-align:right;'>" .
-                " <span style='font-family: FontAwesome; display:inline-block;" .
-                "margin-right: 5px'>&#xf019;</span> Download complete '{$jnlp_file->get_filename()}' file</a>";
-
-            $file = $DB->get_record(
-                'qtype_programmingtask_files',
-                array(
-                    'questionid' => $questionid,
-                    'filearea' => PROFORMA_TASKZIP_FILEAREA));
-            $taskfileinfo = array(
-                'contextid' => $question->contextid,
-                'component' => 'question',
-                'filearea' => PROFORMA_TASKZIP_FILEAREA,
-                'itemid' => "{$qubaid}/$slot/{$questionid}",
-                'filepath' => $file->filepath,
-                'filename' => $file->filename);
-            $url = moodle_url::make_pluginfile_url($taskfileinfo['contextid'], $taskfileinfo['component'],
-                $taskfileinfo['filearea'], $taskfileinfo['itemid'], $taskfileinfo['filepath'],
-                $taskfileinfo['filename'], true);
-            $o .= "<a href='$url' style='display:block;text-align:right;'>" .
-                " <span style='font-family: FontAwesome; display:inline-block;" .
-                "margin-right: 5px'>&#xf019;</span> Download complete '{$file->filename}' file</a>";
-        }
-
         if (empty($options->readonly)) {
             $submissionarea = $this->render_submission_area($qa, $options);
         } else {

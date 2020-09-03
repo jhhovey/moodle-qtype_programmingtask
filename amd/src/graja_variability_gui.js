@@ -10,6 +10,11 @@ define(['jquery', 'core/ajax', 'qtype_programmingtask/dtjava'], function ($, aja
                     {
                         methodname: 'qtype_programmingtask_get_task_template',
                         args: {itemid: itemId, qid: id},
+                        done: function(result) {
+                            console.log("result: " + JSON.stringify(result));
+                            window.alert("result: " + JSON.stringify(result));
+                            dtjava.launch({url: result['jnlp']});
+                        },
                         fail: function(errorObject) {
                             console.log(errorObject);
                             $("#id_error_ajaxerrorlabel").parent().children().first().
@@ -17,11 +22,7 @@ define(['jquery', 'core/ajax', 'qtype_programmingtask/dtjava'], function ($, aja
                                 + 'console.</div>');
                         }
                     }
-                ])[0].done(result => {
-                    console.log("result: " + JSON.stringify(result));
-                    window.alert("result: " + JSON.stringify(result));
-                    return result;
-                });
+                ]);
             });
         }
     };

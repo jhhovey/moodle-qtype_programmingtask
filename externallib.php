@@ -47,39 +47,10 @@ class qtype_programmingtask_external extends external_api {
 
         $usercontext = context_user::instance($USER->id);
         self::validate_context($usercontext);
-        $file = get_task_file($draftid, $usercontext);
-
-        $jnlp_file_info = array(
-            'contextid' => $usercontext->id,
-            'component' => 'qtype_programmingtask',
-            'filearea' => JNLP_FILE_AREA,
-            'itemid' => 0,
-            'filepath' => '/',
-            'filename' => 'Gui.jnlp');
-        $fs = get_file_storage();
-        if ($fs->file_exists($jnlp_file_info['contextid'],
-            $jnlp_file_info['component'],
-            $jnlp_file_info['filearea'],
-            $jnlp_file_info['itemid'],
-            $jnlp_file_info['filepath'],
-            $jnlp_file_info['filename'])) {
-            $fs->get_file(
-                $jnlp_file_info['contextid'],
-                $jnlp_file_info['component'],
-                $jnlp_file_info['filearea'],
-                $jnlp_file_info['itemid'],
-                $jnlp_file_info['filepath'],
-                $jnlp_file_info['filename'])->delete();
-        }
-        $jnlp_file = $fs->create_file_from_string($jnlp_file_info, get_jnlp_file());
-        global $CFG;
-        $files = $fs->get_area_files($jnlp_file->get_contextid(), $jnlp_file->get_component(), $jnlp_file->get_filearea());
-        $keys = array_keys($files);
-        // Index 1 because index 0 is the current directory it seems.
-        $jnlp_file = $files[$keys[1]];
-        //return html_writer::link($url, $file['filename']);
-        //send_stored_file($jnlp_file, 86400, 0, true);
-        return ['file' => $file['url']/*, 'jnlp' => $jnlp_file->get_reference()->url*/];
+        return [
+            'file' => get_task_file($draftid, $usercontext)['url'],
+            'jnlp' => get_jnlp_file_url()
+        ];
     }
 
     public static function extract_task_infos_from_draft_file_parameters() {
