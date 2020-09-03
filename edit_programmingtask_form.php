@@ -51,6 +51,8 @@ class qtype_programmingtask_edit_form extends question_edit_form {
 
         $mform->addElement('button', 'loadproformataskfilebutton', get_string('loadproformataskfile', 'qtype_programmingtask'),
                 array('id' => 'loadproformataskfilebutton'));
+        $mform->addElement('button', 'testthetaskfilebutton', get_string('testthetaskfile', 'qtype_programmingtask'),
+                array('id' => 'testthetaskfilebutton'));
 
         $label = $mform->addElement('static', 'ajaxerrorlabel', '', '');
         $this->set_class_attribute_of_label($label, 'errorlabel');
@@ -61,6 +63,7 @@ class qtype_programmingtask_edit_form extends question_edit_form {
         parent::definition();
 
         $PAGE->requires->js_call_amd('qtype_programmingtask/creation_via_drag_and_drop', 'init');
+        $PAGE->requires->js_call_amd('qtype_programmingtask/graja_variability_gui', 'deployGraja');
     }
 
     protected function definition_inner($mform) {

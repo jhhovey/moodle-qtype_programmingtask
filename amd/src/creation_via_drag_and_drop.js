@@ -27,7 +27,7 @@ define(['jquery', 'core/ajax',
                             methodname: 'qtype_programmingtask_extract_task_infos_from_draft_file',
                             args: {itemid: itemId},
                             done: function (result) {
-
+                                console.log(result);
                                 if (typeof result.error !== 'undefined') {
                                     $("#id_error_ajaxerrorlabel").parent().children().first().
                                             html('<div>' + result.error + '</div>');

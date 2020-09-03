@@ -57,8 +57,8 @@ class proforma_submission_xml_creator extends proforma_xml_creator {
         }
 
         $xml->startElement('files');
-        foreach ($files as $filename => $file) {
-            $isstoredfile = $file instanceof stored_file;
+	foreach ($files as $filename => $file) {
+	    $isstoredfile = $file instanceof stored_file;
             $xml->startElement('file');
             $xml->writeAttribute('mimetype', $isstoredfile ? $file->get_mimetype() : 'text/*');
             if (!$isstoredfile || preg_match($this::MIME_TYPE_TEXT_PATTERN, $file->get_mimetype())) {

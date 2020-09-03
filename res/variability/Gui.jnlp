@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="6.0+" codebase="http://localhost/graja" href="Graja.jnlp">
+	<information>
+		<title>Variability Gui</title>
+		<vendor>Jovan Hovey</vendor>
+		<homepage href="http://localhost/graja" />
+		<description>This Gui supports instantiating variable ProFormA tasks according to the user's specifications.</description>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.8" />
+		<jar href="VariabilityGui.jar"/>
+		<jar href="GrajaComment.jar"/>
+		<jar href="GrajaCommon.jar"/>
+		<jar href="GrajaCore.jar"/>
+		<jar href="GrajaExtendProforma.jar"/>
+		<jar href="GrajaResourceDb.jar"/>
+		<jar href="GrajaStudentpatch.jar"/>
+		<jar href="GrajaTransfer.jar"/>
+		<jar href="GrajaTransform.jar"/>
+		<jar href="GrajaUtilities.jar"/>
+		<jar href="libvts.jar"/>
+		<jar href="Proforma.jar"/>
+		<jar href="extjar/aopalliance-repackaged-b42.jar"/>
+		<jar href="extjar/compiler.jar"/>
+		<jar href="extjar/hk2-api-b42.jar"/>
+		<jar href="extjar/hk2-locator-b42.jar"/>
+		<jar href="extjar/hk2-utils-b42.jar"/>
+		<jar href="extjar/icu4j-stripped.jar"/>
+		<jar href="extjar/jackson-stripped.jar"/>
+		<jar href="extjar/javassist-CR2.jar"/>
+		<jar href="extjar/javax.annotation-api.jar"/>
+		<jar href="extjar/javax.inject.jar"/>
+		<jar href="extjar/javax.inject-b42.jar"/>
+		<jar href="extjar/javax.ws.rs-api.jar"/>
+		<jar href="extjar/jersey-client.jar"/>
+		<jar href="extjar/jersey-common.jar"/>
+		<jar href="extjar/jersey-hk2.jar"/>
+		<jar href="extjar/jersey-media-jaxb.jar"/>
+		<jar href="extjar/jersey-media-multipart.jar"/>
+		<jar href="extjar/mimepull.jar"/>
+		<jar href="extjar/osgi-resource-locator.jar"/>
+	</resources>
+	<application-desc main-class="org.proforma.variability.fx.gui.Gui">
+		<argument>--url=http://localhost:8080/GrajaVariability/rest/instantiate</argument>
+	</application-desc>
+</jnlp>

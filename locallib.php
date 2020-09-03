@@ -68,6 +68,57 @@ define('PROFORMA_ACE_PROGLANGS', [
     'yaml' => 'YAML'
 ]);
 
+define('JNLP_FILE_AREA', 'jnlp');
+define('JNLP_FILE_CONTENT', '<?xml version="1.0" encoding="utf-8"?>\n
+<jnlp spec="6.0+" codebase="http://localhost/graja" href="Gui.jnlp">
+	<information>
+		<title>Variability Gui</title>
+		<vendor>Jovan Hovey</vendor>
+		<homepage href="http://localhost/graja" />
+		<description>This Gui supports instantiating variable ProFormA tasks according to the user\'s specifications.</description>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.8" />
+		<jar href="VariabilityGui.jar"/>
+		<jar href="GrajaComment.jar"/>
+		<jar href="GrajaCommon.jar"/>
+		<jar href="GrajaCore.jar"/>
+		<jar href="GrajaExtendProforma.jar"/>
+		<jar href="GrajaResourceDb.jar"/>
+		<jar href="GrajaStudentpatch.jar"/>
+		<jar href="GrajaTransfer.jar"/>
+		<jar href="GrajaTransform.jar"/>
+		<jar href="GrajaUtilities.jar"/>
+		<jar href="libvts.jar"/>
+		<jar href="Proforma.jar"/>
+		<jar href="extjar/aopalliance-repackaged-b42.jar"/>
+		<jar href="extjar/compiler.jar"/>
+		<jar href="extjar/hk2-api-b42.jar"/>
+		<jar href="extjar/hk2-locator-b42.jar"/>
+		<jar href="extjar/hk2-utils-b42.jar"/>
+		<jar href="extjar/icu4j-stripped.jar"/>
+		<jar href="extjar/jackson-stripped.jar"/>
+		<jar href="extjar/javassist-CR2.jar"/>
+		<jar href="extjar/javax.annotation-api.jar"/>
+		<jar href="extjar/javax.inject.jar"/>
+		<jar href="extjar/javax.inject-b42.jar"/>
+		<jar href="extjar/javax.ws.rs-api.jar"/>
+		<jar href="extjar/jersey-client.jar"/>
+		<jar href="extjar/jersey-common.jar"/>
+		<jar href="extjar/jersey-hk2.jar"/>
+		<jar href="extjar/jersey-media-jaxb.jar"/>
+		<jar href="extjar/jersey-media-multipart.jar"/>
+		<jar href="extjar/mimepull.jar"/>
+		<jar href="extjar/osgi-resource-locator.jar"/>
+	</resources>
+	<application-desc main-class="org.proforma.variability.fx.gui.Gui">
+		<argument>--url=%s</argument>
+	</application-desc>
+</jnlp>');
+//http://localhost:8080/GrajaVariability/rest/instantiate
 require_once($CFG->dirroot . '/question/engine/lib.php');
 require_once($CFG->dirroot . '/mod/quiz/attemptlib.php');
 require_once($CFG->dirroot . '/mod/quiz/accessmanager.php');
@@ -85,35 +136,10 @@ use qtype_programmingtask\utility\proforma_xml\separate_feedback_handler;
 function unzip_task_file_in_draft_area($draftareaid, $usercontext) {
     global $USER;
 
+    $task_file = get_task_file($draftareaid, $usercontext);
+    $file = $task_file['file'];
+    $filename = $task_file['filename'];
     $fs = get_file_storage();
-
-    // Check if there is only the file we want.
-    $area = file_get_draft_area_info($draftareaid, "/");
-    if ($area['filecount'] == 0) {
-        return false;
-    } else if ($area['filecount'] > 1 || $area['foldercount'] != 0) {
-        throw new invalid_parameter_exception(
-                'Only one file is allowed to be in this draft area: A ProFormA-Task as either ZIP or XML file.');
-    }
-
-    // Get name of the file.
-    $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftareaid);
-    // Get_area_files returns an associative array where the keys are some kind of hash value.
-    $keys = array_keys($files);
-    // Index 1 because index 0 is the current directory it seems.
-    $filename = $files[$keys[1]]->get_filename();
-
-    $file = $fs->get_file($usercontext->id, 'user', 'draft', $draftareaid, "/", $filename);
-
-    // Check file type (it's really only checking the file extension but that is good enough here).
-    $fileinfo = pathinfo($filename);
-    $filetype = '';
-    if (array_key_exists('extension', $fileinfo)) {
-        $filetype = strtolower($fileinfo['extension']);
-    }
-    if ($filetype != 'zip') {
-        throw new invalid_parameter_exception('Supplied file must be a zip file.');
-    }
 
     // Unzip file - basically copied from draftfiles_ajax.php.
     $zipper = get_file_packer('application/zip');
@@ -158,6 +184,48 @@ function unzip_task_file_in_draft_area($draftareaid, $usercontext) {
     }
 
     return $filename;
+}
+
+/**
+ * Returns an array of the task file and its name.
+ * @param type $draftareaid
+ * @param type $usercontext
+ * @return array|false
+ * @throws invalid_parameter_exception
+ */
+function get_task_file($draftareaid, $usercontext) {
+    $fs = get_file_storage();
+
+    // Check if there is only the file we want.
+    $area = file_get_draft_area_info($draftareaid, "/");
+    if ($area['filecount'] == 0) {
+        return false;
+    } else if ($area['filecount'] > 1 || $area['foldercount'] != 0) {
+        throw new invalid_parameter_exception(
+            'Only one file is allowed to be in this draft area: A ProFormA-Task as either ZIP or XML file.');
+    }
+
+    // Get name of the file.
+    $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftareaid);
+    // Get_area_files returns an associative array where the keys are some kind of hash value.
+    $keys = array_keys($files);
+    // Index 1 because index 0 is the current directory it seems.
+    $filename = $files[$keys[1]]->get_filename();
+
+    $file = $fs->get_file($usercontext->id, 'user', 'draft', $draftareaid, "/", $filename);
+
+    // Check file type (it's really only checking the file extension but that is good enough here).
+    $fileinfo = pathinfo($filename);
+    $filetype = '';
+    if (array_key_exists('extension', $fileinfo)) {
+        $filetype = strtolower($fileinfo['extension']);
+    }
+    if ($filetype != 'zip') {
+        throw new invalid_parameter_exception('Supplied file must be a zip file.');
+    }
+    global $CFG;
+    $url = $CFG->wwwroot.'/draftfile.php/'.$usercontext->id.'/user/draft/'.$draftareaid.'/'.$filename;
+    return ['file' => $file, 'filename' => $filename, 'url' => $url];
 }
 
 /* * Removes all files and directories from the given draft area except a file with the given file name
@@ -339,6 +407,34 @@ function save_task_and_according_files($question) {
     $record->filename = $filename;
     $record->filearea = PROFORMA_TASKZIP_FILEAREA;
     $filesfordb[] = $record;
+
+    //Now create JNLP file
+    $filename = 'Gui.jnlp';
+    $newfilerecord = array(
+        'component' => 'question',
+        'filearea' => JNLP_FILE_AREA,
+        'itemid' => $question->id,
+        'contextid' => $question->context->id,
+        'filepath' => '/',
+        'filename' => $filename);
+    $fs->create_file_from_string($newfilerecord, get_jnlp_file());
+
+    $record = new stdClass();
+    $record->questionid = $question->id;
+    $record->fileid = 'jnlp';
+    $record->usedbygrader = 0;
+    $record->visibletostudents = 0;
+    $record->usagebylms = 'download';
+    $record->filepath = '/';
+    $record->filename = $filename;
+    $record->filearea = JNLP_FILE_AREA;
+    $filesfordb[] = $record;
+
+    $names = '';
+    foreach($filesfordb as $file) {
+        $names .= $file->filename . '|';
+    }
+    error_log($names);
 
     // Save all records in database.
     $DB->insert_records('qtype_programmingtask_files', $filesfordb);
@@ -746,4 +842,10 @@ function mangle_pathname($filename) {
     $filename = preg_replace('/\.\.+/', '', $filename); // Prevent /.../   .
     $filename = ltrim($filename, '/');                  // No leading slash.
     return $filename;
+}
+
+function get_jnlp_file() {
+    global $CFG;
+    //return $CFG->wwwroot . '/question/type/programmingtask/res/variability/Gui.jnlp';
+    return sprintf(JNLP_FILE_CONTENT, "http://localhost:8080/GrajaVariability/rest/instantiate");
 }

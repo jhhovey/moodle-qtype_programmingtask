@@ -21,6 +21,67 @@ require_once("$CFG->dirroot/question/type/programmingtask/locallib.php");
 
 class qtype_programmingtask_external extends external_api {
 
+    public static function get_task_template_parameters() {
+        return new external_function_parameters(
+            array(
+                'itemid' => new external_value(PARAM_INT, 'draft area id'),
+                'qid' => new external_value(PARAM_TEXT, 'question id')
+            )
+        );
+    }
+
+    public static function get_task_template_returns() {
+        new external_single_structure(
+            array(
+                'file' => new external_value(PARAM_TEXT, 'url to the task template')//,
+                //'jnlp' => new external_files('jnlp file', VALUE_OPTIONAL)
+            )
+        );
+    }
+
+    public static function get_task_template($itemid, $qid) {
+        global $USER;
+        $params = self::validate_parameters(self::get_task_template_parameters(), array('itemid' => $itemid,'qid' => $qid));
+        $draftid = $params['itemid'];
+        $questionid = $params['qid'];
+
+        $usercontext = context_user::instance($USER->id);
+        self::validate_context($usercontext);
+        $file = get_task_file($draftid, $usercontext);
+
+        $jnlp_file_info = array(
+            'contextid' => $usercontext->id,
+            'component' => 'qtype_programmingtask',
+            'filearea' => JNLP_FILE_AREA,
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'Gui.jnlp');
+        $fs = get_file_storage();
+        if ($fs->file_exists($jnlp_file_info['contextid'],
+            $jnlp_file_info['component'],
+            $jnlp_file_info['filearea'],
+            $jnlp_file_info['itemid'],
+            $jnlp_file_info['filepath'],
+            $jnlp_file_info['filename'])) {
+            $fs->get_file(
+                $jnlp_file_info['contextid'],
+                $jnlp_file_info['component'],
+                $jnlp_file_info['filearea'],
+                $jnlp_file_info['itemid'],
+                $jnlp_file_info['filepath'],
+                $jnlp_file_info['filename'])->delete();
+        }
+        $jnlp_file = $fs->create_file_from_string($jnlp_file_info, get_jnlp_file());
+        global $CFG;
+        $files = $fs->get_area_files($jnlp_file->get_contextid(), $jnlp_file->get_component(), $jnlp_file->get_filearea());
+        $keys = array_keys($files);
+        // Index 1 because index 0 is the current directory it seems.
+        $jnlp_file = $files[$keys[1]];
+        //return html_writer::link($url, $file['filename']);
+        //send_stored_file($jnlp_file, 86400, 0, true);
+        return ['file' => $file['url']/*, 'jnlp' => $jnlp_file->get_reference()->url*/];
+    }
+
     public static function extract_task_infos_from_draft_file_parameters() {
         return new external_function_parameters(
                 array(
@@ -159,4 +220,24 @@ class qtype_programmingtask_external extends external_api {
         return retrieve_grading_results($qubaid);
     }
 
+}
+
+function programmingtask_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    // copied from https://docs.moodle.org/dev/File_API
+
+    // Use the itemid to retrieve any relevant data records and perform any security checks to see if the
+    // user really does have access to the file in question.
+
+    // Extract the filename / filepath from the $args array.
+    $filename = array_pop($args); // The last item in the $args array.
+    if (!$args) {
+        $filepath = '/'; // $args is empty => the path is '/'
+    } else {
+        $filepath = '/'.implode('/', $args).'/'; // $args contains elements of the filepath
+    }
+
+    // Retrieve the file from the Files API.
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'qtype_programmingtask', $filearea, 0, $filepath, $filename);
+    send_stored_file($file, 86400, 0, $forcedownload, $options);
 }

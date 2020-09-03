@@ -108,5 +108,6 @@ $string['test'] = 'Test';
 $string['testdescription'] = 'Test description';
 $string['testgroup'] = 'Testgroup';
 $string['testresult'] = 'Test result';
+$string['testthetaskfile'] = 'Test the task file';
 $string['timeout'] = 'Grappa-Timeout';
 $string['yourcode'] = 'Your code';

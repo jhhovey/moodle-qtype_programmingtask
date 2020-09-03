@@ -20,6 +20,16 @@ defined('MOODLE_INTERNAL') || die();
  * Web service for qtype programmingtask
  */
 $functions = array(
+    'qtype_programmingtask_get_task_template' => array(
+        'classname' => 'qtype_programmingtask_external',
+        'methodname' => 'get_task_template',
+        'classpath' => 'question/type/programmingtask/externallib.php',
+        'description' => 'Returns the uploaded task template file by ID.',
+        'type' => 'read',
+        'capabilities' => 'moodle/question:add',
+        'ajax' => true,
+        'services' => array('programmingtaskwebservice')
+    ),
     'qtype_programmingtask_extract_task_infos_from_draft_file' => array(
         'classname' => 'qtype_programmingtask_external',
         'methodname' => 'extract_task_infos_from_draft_file',
@@ -44,7 +54,7 @@ $functions = array(
 
 $services = array(
     'programmingtaskwebservice' => array(
-        'functions' => array('qtype_programmingtask_extract_task_infos_from_draft_file',
+        'functions' => array('qtype_programmingtask_get_task_template', 'qtype_programmingtask_extract_task_infos_from_draft_file',
             'qtype_programmingtask_check_if_any_gradeprocess_finished'),
         'requiredcapability' => '',
         'restrictedusers' => 0,
