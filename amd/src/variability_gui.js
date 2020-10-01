@@ -1,34 +1,17 @@
-define(['jquery', 'core/ajax', 'qtype_programmingtask/dtjava'], function ($, ajax, dtjava) {
+define(['jquery', 'qtype_programmingtask/dtjava'], function ($, dtjava) {
     return {
-        deployGraja: function() {
+        deployGui: function() {
             $("#testthetaskfilebutton").click(function () {
-                const fileManager = $("#id_proformataskfileupload").parent();
-                const itemId = fileManager.find("[name='proformataskfileupload']")[0].value;
-                ajax.call([
-                    {
-                        methodname: 'qtype_programmingtask_get_task_template',
-                        args: {itemid: itemId},
-                        done: function (result) {
-                            console.log("result: " + JSON.stringify(result));
-                            const app = new dtjava.App(
-                                'http://localhost/graja/Graja.jnlp',
-                                {
-                                    params: [
-                                        '--input ' + result,
-                                        '--url=' + "http://localhost:8080/GrajaVariability/rest/instantiate"
-                                    ]
-                                }
-                            );
-                            dtjava.launch(app, null, null);
-                        },
-                        fail: function(errorObject) {
-                            console.log(errorObject);
-                            $("#id_error_ajaxerrorlabel").parent().children().first().
-                            html('<div>' + errorObject.debuginfo + '</div><div> For more information see browser '
-                                + 'console.</div>');
-                        }
-                    }
-                ]);
+                const baseUrl = $("[name='jnlpUrl']").val();
+                /*const service = $("[name='serviceUrl']").val();
+                const qid = $("[name='questionId']").val();
+                const taskTemplate = $("[name='taskTemplate']").val();*/
+                const url = baseUrl/* + "?service=" + service +
+                    "&question_id=" + qid.toString() +
+                    "&task_template=" + taskTemplate*/;
+                console.log("url: " + url);
+                window.alert("url: " + url);
+                dtjava.launch({url: url});
             });
         }
     };

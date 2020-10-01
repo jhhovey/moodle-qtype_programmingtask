@@ -15,6 +15,7 @@
                 <FIELD NAME="ftsmaxnumfields" TYPE="int" LENGTH="8" NOTNULL="false" SEQUENCE="false" DEFAULT="0"/>
                 <FIELD NAME="ftsautogeneratefilenames" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" DEFAULT="1"/>
                 <FIELD NAME="ftsstandardlang" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" DEFAULT="txt"/>
+                <FIELD NAME="isvariabletask" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" DEFAULT="0"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -61,6 +61,7 @@ $string['hasbeennullified'] = 'has been nullified';
 $string['initialnumberfreetextfieldsgreaterthanmax'] = 'Initial number of free text input fields must not be greater than maximal number of free text input fields';
 $string['internaldescription'] = 'Internal description';
 $string['invalidproformanamespace'] = 'Could not detect ProFormA-version. Can\'t validate task.xml file or extract data from it. Supported versions: {$a}';
+$string['isvariabletask'] = 'Is a task template';
 $string['lmsid'] = 'LMS-ID';
 $string['loadproformataskfile'] = 'Extract information';
 $string['minimum'] = 'Minimum';

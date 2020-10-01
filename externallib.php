@@ -45,29 +45,69 @@ class qtype_programmingtask_external extends external_api {
         $draftid = $params['itemid'];
         $questionid = $params['qid'];
 
-        $usercontext = context_user::instance($USER->id);
-        self::validate_context($usercontext);
+        $contextid = context_user::instance($USER->id);
+        self::validate_context($contextid);
         return [
-            'file' => get_task_file($draftid, $usercontext)['url'],
+            'file' => get_task_file($draftid, $contextid)['url'],
             'jnlp' => get_jnlp_file_url()
         ];
     }
 
+    public static function instantiate_template_parameters() {
+        return new external_single_structure(array(
+            new external_value(PARAM_INT, 'question id'),
+            new external_value(PARAM_TEXT, 'cvvp')
+        ));
+    }
+
+    public static function instantiate_template_returns() {
+        return new external_single_structure(array());
+    }
+
+    public static function instantiate_template($questionid, $cvvp) {
+        global $USER, $DB;
+        $contextid = context_user::instance($USER->id);
+        self::validate_context($contextid);
+        $params = self::validate_parameters(
+            self::instantiate_template_parameters(),
+            array('question id' => $questionid, 'cvvp' => $cvvp));
+        $questionid = $params['question id'];
+        $cvvp = $params['cvvp'];
+        $task_template_record = $DB->get_record(
+            'qtype_programmingtask_files',
+            array('questionid' => $questionid, 'filearea' => PROFORMA_TASKZIP_FILEAREA));
+        $fs = get_file_storage();
+        $task_template = $fs->get_file(
+            contextid,
+            'question',
+            PROFORMA_TASKZIP_FILEAREA,
+            $questionid,
+            '/',
+            $task_template_record->filename);
+
+        $curl = new \curl();
+        $task_instance = $curl->post(
+            "http://localhost:8080/GrajaVariability/rest/instantiate",
+            array('task' => $task_template, 'mode' => 'GIVEN', 'specs' => $cvvp));
+        var_dump($task_instance);
+    }
+
     public static function extract_task_infos_from_draft_file_parameters() {
         return new external_function_parameters(
-                array(
-            'itemid' => new external_value(PARAM_INT, 'id of the draft area')
-                )
+            array(
+                'itemid' => new external_value(PARAM_INT, 'id of the draft area')
+            )
         );
     }
 
     public static function extract_task_infos_from_draft_file_returns() {
         new external_single_structure(
-                array(
-            'title' => new external_value(PARAM_TEXT, 'title of the task'),
-            'description' => new external_value(PARAM_RAW, 'description of the task'),
-            'internaldescription' => new external_value(PARAM_RAW, 'internal description of the task')
-                )
+            array(
+                'title' => new external_value(PARAM_TEXT, 'title of the task'),
+                'description' => new external_value(PARAM_RAW, 'description of the task'),
+                'internaldescription' => new external_value(PARAM_RAW, 'internal description of the task'),
+                'istasktemplate' => new external_value(PARAM_INT, 'true if upload is a task template, false if not')
+            )
         );
     }
 
@@ -93,9 +133,10 @@ class qtype_programmingtask_external extends external_api {
             return ['error' => 'Error extracting zip file'];
         }
 
+        $returnval = array();
         $doc = create_domdocument_from_task_xml($usercontext, $draftid, $filename);
         $namespace = detect_proforma_namespace($doc);
-        $returnval = array();
+        $returnval['istasktemplate'] = is_task_template($doc);
 
         if ($namespace == null) {
 

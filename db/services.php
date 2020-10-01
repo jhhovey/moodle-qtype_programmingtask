@@ -25,7 +25,19 @@ $functions = array(
         'methodname' => 'get_task_template',
         'classpath' => 'question/type/programmingtask/externallib.php',
         'description' => 'Returns the uploaded task template file by ID.',
-        'type' => 'read',
+        'shortname' => 'get_task_template',
+        'type' => 'write',
+        'capabilities' => 'moodle/question:add',
+        'ajax' => true,
+        'services' => array('programmingtaskwebservice')
+    ),
+    'qtype_programmingtask_instantiate_template' => array(
+        'classname' => 'qtype_programmingtask_external',
+        'methodname' => 'instantiate_template',
+        'classpath' => 'question/type/programmingtask/externallib.php',
+        'description' => 'Instantiates the template with specified values and stores the result for submissions.',
+        'shortname' => 'instantiate_template',
+        'type' => 'write',
         'capabilities' => 'moodle/question:add',
         'ajax' => true,
         'services' => array('programmingtaskwebservice')
@@ -54,7 +66,10 @@ $functions = array(
 
 $services = array(
     'programmingtaskwebservice' => array(
-        'functions' => array('qtype_programmingtask_get_task_template', 'qtype_programmingtask_extract_task_infos_from_draft_file',
+        'functions' => array(
+            'qtype_programmingtask_get_task_template',
+            'qtype_programmingtask_instantiate_template',
+            'qtype_programmingtask_extract_task_infos_from_draft_file',
             'qtype_programmingtask_check_if_any_gradeprocess_finished'),
         'requiredcapability' => '',
         'restrictedusers' => 0,

@@ -39,6 +39,7 @@ define(['jquery', 'core/ajax',
                                 editorEditor.setContents('id_questiontext', result.description);
                                 editorEditor.setContents('id_internaldescription', result.internaldescription);
                                 editorEditor.setContentsOfText('id_taskuuid', result.taskuuid);
+                                $("#id_isvariabletask").attr("checked", result.istasktemplate);
                                 var warnings = '';
                                 if (typeof result.moodleValidationWarnings !== 'undefined') {
                                     if (typeof result.moodleValidationProformaNamespace !== 'undefined') {

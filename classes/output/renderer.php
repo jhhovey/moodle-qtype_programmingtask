@@ -61,6 +61,43 @@ class qtype_programmingtask_renderer extends qtype_renderer {
         $PAGE->requires->js($plugindirrel . '/ace/ace.js');
         $PAGE->requires->js($plugindirrel . '/ace/ext-language_tools.js');
         $PAGE->requires->js($plugindirrel . '/ace/ext-modelist.js');
+        $PAGE->requires->js_call_amd('qtype_programmingtask/variability_gui', 'deployGui');
+
+        // If teacher, display test option for download.
+        if (has_capability('mod/quiz:grade', $PAGE->context)) {
+            $service = 'http://localhost:8080/GrajaVariability/rest/instantiate';
+            $file = $DB->get_record(
+                'qtype_programmingtask_files',
+                array(
+                    'questionid' => $questionid,
+                    'filearea' => PROFORMA_TASKZIP_FILEAREA));
+            $taskfileinfo = array(
+                'contextid' => $question->contextid,
+                'component' => 'question',
+                'filearea' => PROFORMA_TASKZIP_FILEAREA,
+                'itemid' => "{$qubaid}/$slot/{$questionid}",
+                'filepath' => $file->filepath,
+                'filename' => $file->filename);
+            $url = moodle_url::make_pluginfile_url($taskfileinfo['contextid'], $taskfileinfo['component'],
+                $taskfileinfo['filearea'], $taskfileinfo['itemid'], $taskfileinfo['filepath'],
+                $taskfileinfo['filename'], false);
+
+            $jnlp_url = get_jnlp_file_url() . '?service=' . rawurlencode($service) . '&question_id=' . $questionid;
+            $o .= "<form class='mform'>" .
+                "<div style='display: none;'>" .
+                "<input name='jnlpUrl' type='hidden' value='" . $jnlp_url . "'>" .
+                "<input name='serviceUrl' type='hidden' value='" . rawurlencode($service) . "'>" .
+                "<input name='questionId' type='hidden' value='" . $questionid . "'>" .
+                "<input name='taskTemplate' type='hidden' value='" . rawurlencode($url) . "'>" .
+                "</div>" .
+                "<button class='btn btn-secondary ml-0' name='testthetaskfilebutton' id='testthetaskfilebutton' type='button'>" .
+                "Download teacher client for {$file->filename}" .
+                "</button>" .
+                "</form>";
+            /*$o .= "<a href='$jnlp_url' style='display:block;text-align:right;'>" .
+                " <span style='font-family: FontAwesome; display:inline-block;" .
+                "margin-right: 5px'>&#xf019;</span>Download teacher client for '{$file->filename}'</a>";*/
+        }
 
         if (empty($options->readonly)) {
             $submissionarea = $this->render_submission_area($qa, $options);

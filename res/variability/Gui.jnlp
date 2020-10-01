@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="6.0+" codebase="http://localhost/graja" href="Graja.jnlp">
+<jnlp spec="6.0+" codebase="http://localhost/graja">
 	<information>
 		<title>Variability Gui</title>
 		<vendor>Jovan Hovey</vendor>
 		<homepage href="http://localhost/graja" />
-		<description>This Gui supports instantiating variable ProFormA tasks according to the user's specifications.</description>
+		<description>
+			This Gui supports instantiating variable ProFormA tasks according to the user's specifications.
+		</description>
 	</information>
 	<security>
 		<all-permissions/>
 	</security>
 	<resources>
 		<j2se version="1.8" />
+		<!-- edit the value of this property tag to set the url of the instantiating service -->
+		<property name="url" value="http://localhost:8080/GrajaVariability/rest/instantiate" />
 		<jar href="VariabilityGui.jar"/>
 		<jar href="GrajaComment.jar"/>
 		<jar href="GrajaCommon.jar"/>
@@ -43,7 +47,5 @@
 		<jar href="extjar/mimepull.jar"/>
 		<jar href="extjar/osgi-resource-locator.jar"/>
 	</resources>
-	<application-desc main-class="org.proforma.variability.fx.gui.Gui">
-		<argument>--url=http://localhost:8080/GrajaVariability/rest/instantiate</argument>
-	</application-desc>
+	<application-desc main-class="org.proforma.variability.fx.gui.Gui" />
 </jnlp>

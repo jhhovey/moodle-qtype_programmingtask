@@ -51,8 +51,6 @@ class qtype_programmingtask_edit_form extends question_edit_form {
 
         $mform->addElement('button', 'loadproformataskfilebutton', get_string('loadproformataskfile', 'qtype_programmingtask'),
                 array('id' => 'loadproformataskfilebutton'));
-        $mform->addElement('button', 'testthetaskfilebutton', get_string('testthetaskfile', 'qtype_programmingtask'),
-                array('id' => 'testthetaskfilebutton'));
 
         $label = $mform->addElement('static', 'ajaxerrorlabel', '', '');
         $this->set_class_attribute_of_label($label, 'errorlabel');
@@ -63,7 +61,6 @@ class qtype_programmingtask_edit_form extends question_edit_form {
         parent::definition();
 
         $PAGE->requires->js_call_amd('qtype_programmingtask/creation_via_drag_and_drop', 'init');
-        $PAGE->requires->js_call_amd('qtype_programmingtask/graja_variability_gui', 'deployGraja');
     }
 
     protected function definition_inner($mform) {
@@ -89,8 +86,11 @@ class qtype_programmingtask_edit_form extends question_edit_form {
         $mform->setType('taskuuid', PARAM_TEXT);
         $mform->addRule('taskuuid', get_string('taskuuidrequired', 'qtype_programmingtask'), 'required');
 
+        $mform->addElement('advcheckbox', 'isvariabletask',
+            get_string('isvariabletask', 'qtype_programmingtask'), ' ');
+
         $mform->addElement('advcheckbox', 'showstudscorecalcscheme',
-                get_string('showstudscorecalcscheme', 'qtype_programmingtask'), ' ');
+            get_string('showstudscorecalcscheme', 'qtype_programmingtask'), ' ');
 
         $mform->addElement('header', 'submissionsettings', get_string('submissionsettings', 'qtype_programmingtask'));
 

@@ -30,6 +30,7 @@ define('PROFORMA_RETRIEVE_GRADING_RESULTS_LOCK_MAXLIFETIME', 10);
 
 // ProFormA task xml namespaces.
 define('PROFORMA_TASK_XML_NAMESPACES', [/* First namespace is default namespace. */'urn:proforma:v2.0.1', 'urn:proforma:v2.0']);
+define('PROFORMA_TEMPLATE_XML_NAMESPACES', ['urn:proforma:variability:v1.0', 'urn:graja:extendproforma:v2.0.0']);
 
 define('PROFORMA_MERGED_FEEDBACK_TYPE', 'merged-test-feedback');
 define('PROFORMA_SEPARATE_FEEDBACK_TYPE', 'separate-test-feedback');
@@ -700,6 +701,15 @@ function detect_proforma_namespace(DOMDocument $doc) {
         }
     }
     return null;
+}
+
+function is_task_template(DOMDocument $doc) {
+    foreach (PROFORMA_TEMPLATE_XML_NAMESPACES as $namespace) {
+        if ($doc->getElementsByTagNameNS($namespace, "*")->length != 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function validate_proforma_file_against_schema(DOMDocument $doc, $namespace): array {
