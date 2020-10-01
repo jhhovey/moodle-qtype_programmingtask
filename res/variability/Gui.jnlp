@@ -16,15 +16,6 @@
 		<!-- edit the value of this property tag to set the url of the instantiating service -->
 		<property name="url" value="http://localhost:8080/GrajaVariability/rest/instantiate" />
 		<jar href="VariabilityGui.jar"/>
-		<jar href="GrajaComment.jar"/>
-		<jar href="GrajaCommon.jar"/>
-		<jar href="GrajaCore.jar"/>
-		<jar href="GrajaExtendProforma.jar"/>
-		<jar href="GrajaResourceDb.jar"/>
-		<jar href="GrajaStudentpatch.jar"/>
-		<jar href="GrajaTransfer.jar"/>
-		<jar href="GrajaTransform.jar"/>
-		<jar href="GrajaUtilities.jar"/>
 		<jar href="libvts.jar"/>
 		<jar href="Proforma.jar"/>
 		<jar href="extjar/aopalliance-repackaged-b42.jar"/>
@@ -32,8 +23,6 @@
 		<jar href="extjar/hk2-api-b42.jar"/>
 		<jar href="extjar/hk2-locator-b42.jar"/>
 		<jar href="extjar/hk2-utils-b42.jar"/>
-		<jar href="extjar/icu4j-stripped.jar"/>
-		<jar href="extjar/jackson-stripped.jar"/>
 		<jar href="extjar/javassist-CR2.jar"/>
 		<jar href="extjar/javax.annotation-api.jar"/>
 		<jar href="extjar/javax.inject.jar"/>
