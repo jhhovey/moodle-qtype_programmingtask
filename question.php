@@ -130,7 +130,7 @@ class qtype_programmingtask_question extends question_graded_automatically {
         unset($argscopy[0]);
         $relativepath = implode('/', $argscopy);
         if (in_array($filearea, array(PROFORMA_TASKZIP_FILEAREA, PROFORMA_ATTACHED_TASK_FILES_FILEAREA,
-                    PROFORMA_EMBEDDED_TASK_FILES_FILEAREA, PROFORMA_TASKXML_FILEAREA))) {
+                    PROFORMA_EMBEDDED_TASK_FILES_FILEAREA, PROFORMA_TASKXML_FILEAREA, PROFORMA_TEMPLATEXML_FILEAREA))) {
             // If it is one of those files we need to check permissions because students could just guess download urls
             // and not all files should be downloadable by students
             // From the DBs point of view this combination of fields doesn't guarantee uniqueness; however, conceptually it does.

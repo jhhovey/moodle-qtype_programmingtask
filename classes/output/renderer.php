@@ -64,7 +64,7 @@ class qtype_programmingtask_renderer extends qtype_renderer {
         $PAGE->requires->js_call_amd('qtype_programmingtask/variability_gui', 'deployGui');
 
         // If teacher, display test option for download.
-        if (has_capability('mod/quiz:grade', $PAGE->context)) {
+        if ($question->isvariabletask && has_capability('mod/quiz:grade', $PAGE->context)) {
             $service = 'http://localhost:8080/GrajaVariability/rest/instantiate';
             $file = $DB->get_record(
                 'qtype_programmingtask_files',

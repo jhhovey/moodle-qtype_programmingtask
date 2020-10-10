@@ -19,6 +19,7 @@ defined('MOODLE_INTERNAL') || die();
 // Name of file areas.
 define('PROFORMA_TASKZIP_FILEAREA', 'taskfile');
 define('PROFORMA_TASKXML_FILEAREA', 'taskxmlfile');
+define('PROFORMA_TEMPLATEXML_FILEAREA', 'templatexmlfile');
 define('PROFORMA_ATTACHED_TASK_FILES_FILEAREA', 'attachedtaskfiles');
 define('PROFORMA_EMBEDDED_TASK_FILES_FILEAREA', 'embeddedtaskfiles');
 define('PROFORMA_SUBMISSION_ZIP_FILEAREA', 'submissionzip');
@@ -30,7 +31,6 @@ define('PROFORMA_RETRIEVE_GRADING_RESULTS_LOCK_MAXLIFETIME', 10);
 
 // ProFormA task xml namespaces.
 define('PROFORMA_TASK_XML_NAMESPACES', [/* First namespace is default namespace. */'urn:proforma:v2.0.1', 'urn:proforma:v2.0']);
-define('PROFORMA_TEMPLATE_XML_NAMESPACES', ['urn:proforma:variability:v1.0', 'urn:graja:extendproforma:v2.0.0']);
 
 define('PROFORMA_MERGED_FEEDBACK_TYPE', 'merged-test-feedback');
 define('PROFORMA_SEPARATE_FEEDBACK_TYPE', 'separate-test-feedback');
@@ -291,7 +291,7 @@ function save_task_and_according_files($question) {
 
     // Copy all extracted files to the corresponding file area.
     file_save_draft_area_files($draftareaid, $question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA,
-            $question->id, array('subdirs' => true));
+        $question->id, array('subdirs' => true));
 
     $doc = create_domdocument_from_task_xml($usercontext, $draftareaid, $filename);
     $namespace = detect_proforma_namespace($doc);
@@ -313,7 +313,7 @@ function save_task_and_according_files($question) {
 
                 // Compensate the fact that the filename might contain a relative path.
                 $pathinfo = pathinfo('/' . $file->attributes->getNamedItem('id')->nodeValue . '/' .
-                        $child->attributes->getNamedItem('filename')->nodeValue);
+                    $child->attributes->getNamedItem('filename')->nodeValue);
 
                 $fileinfo = array(
                     'component' => 'question',
@@ -330,7 +330,7 @@ function save_task_and_according_files($question) {
                 $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
                 $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
                 $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
-                        $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
+                    $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
                 $record->filepath = '/' . $file->attributes->getNamedItem('id')->nodeValue . '/';
                 $record->filename = $child->attributes->getNamedItem('filename')->nodeValue;
                 $record->filearea = PROFORMA_EMBEDDED_TASK_FILES_FILEAREA;
@@ -348,7 +348,7 @@ function save_task_and_according_files($question) {
                 $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
                 $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
                 $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
-                        $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
+                    $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
                 $record->filepath = $pathinfo['dirname'] . '/';
                 $record->filename = $pathinfo['basename'];
                 $record->filearea = PROFORMA_ATTACHED_TASK_FILES_FILEAREA;
@@ -364,7 +364,7 @@ function save_task_and_according_files($question) {
 
     // Now move the task xml file to the designated area.
     $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
-            '/', 'task.xml');
+        '/', 'task.xml');
     $newfilerecord = array(
         'component' => 'question',
         'filearea' => PROFORMA_TASKXML_FILEAREA,
@@ -385,6 +385,33 @@ function save_task_and_according_files($question) {
     $record->filename = 'task.xml';
     $record->filearea = PROFORMA_TASKXML_FILEAREA;
     $filesfordb[] = $record;
+
+    // Now move the template xml file to the designated area.
+    if ($fs->file_exists($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
+        '/', 'tpl.xml')) {
+        $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
+            '/', 'tpl.xml');
+        $newfilerecord = array(
+            'component' => 'question',
+            'filearea' => PROFORMA_TEMPLATEXML_FILEAREA,
+            'itemid' => $question->id,
+            'contextid' => $question->context->id,
+            'filepath' => '/',
+            'filename' => 'tpl.xml');
+        $fs->create_file_from_storedfile($newfilerecord, $file);
+        $file->delete();
+
+        $record = new stdClass();
+        $record->questionid = $question->id;
+        $record->fileid = 'templatexml';
+        $record->usedbygrader = 0;
+        $record->visibletostudents = 0;
+        $record->usagebylms = 'download';
+        $record->filepath = '/';
+        $record->filename = 'tpl.xml';
+        $record->filearea = PROFORMA_TEMPLATEXML_FILEAREA;
+        $filesfordb[] = $record;
+    }
 
     // Now move the task zip file to the designated area.
     $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
@@ -703,15 +730,6 @@ function detect_proforma_namespace(DOMDocument $doc) {
     return null;
 }
 
-function is_task_template(DOMDocument $doc) {
-    foreach (PROFORMA_TEMPLATE_XML_NAMESPACES as $namespace) {
-        if ($doc->getElementsByTagNameNS($namespace, "*")->length != 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function validate_proforma_file_against_schema(DOMDocument $doc, $namespace): array {
     $msgs = [];
     $schema = file_get_contents(__DIR__ . "/res/proforma/xsd/$namespace.xsd");
@@ -832,11 +850,18 @@ function mangle_pathname($filename) {
     return $filename;
 }
 
+function is_task_template($draftareaid, $usercontext) {
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftareaid);
+    foreach ($files as $file) {
+        if (strpos($file->get_filename(), 'tpl.xml') !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function get_jnlp_file_url() {
     global $CFG;
     return $CFG->wwwroot . '/question/type/programmingtask/res/variability/Gui.jnlp';
-}
-
-function get_jnlp_file() {
-    return sprintf(JNLP_FILE_CONTENT, "http://localhost:8080/GrajaVariability/rest/instantiate");
 }

@@ -82,6 +82,7 @@ class qtype_programmingtask extends question_type {
         $fs->delete_area_files($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id);
         $fs->delete_area_files($question->context->id, 'question', PROFORMA_EMBEDDED_TASK_FILES_FILEAREA, $question->id);
         $fs->delete_area_files($question->context->id, 'question', PROFORMA_TASKXML_FILEAREA, $question->id);
+        $fs->delete_area_files($question->context->id, 'question', PROFORMA_TEMPLATEXML_FILEAREA, $question->id);
         save_task_and_according_files($question);
 
         // Store custom settings for free text input fields.
@@ -112,7 +113,8 @@ class qtype_programmingtask extends question_type {
         $fs->delete_area_files($contextid, 'question', PROFORMA_TASKZIP_FILEAREA, $questionid);
         $fs->delete_area_files($contextid, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $questionid);
         $fs->delete_area_files($contextid, 'question', PROFORMA_EMBEDDED_TASK_FILES_FILEAREA, $questionid);
-        $fs->delete_area_files($contextid, 'question', PROFORMA_TASKXML_FILEAREA, $question->id);
+        $fs->delete_area_files($contextid, 'question', PROFORMA_TASKXML_FILEAREA, $questionid);
+        $fs->delete_area_files($contextid, 'question', PROFORMA_TEMPLATEXML_FILEAREA, $questionid);
 
         parent::delete_question($questionid, $contextid);
     }

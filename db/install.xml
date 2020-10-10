@@ -20,7 +20,7 @@
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
                 <KEY NAME="questionid" TYPE="foreign-unique" FIELDS="questionid" REFTABLE="question" REFFIELDS="id"/>
-                <KEY NAME="graderid" TYPE="foreign-unique" FIELDS="graderid" REFTABLE="qtype_programmingtask_gradrs" REFFIELDS="graderid"/>
+                <KEY NAME="graderid" TYPE="foreign" FIELDS="graderid" REFTABLE="qtype_programmingtask_gradrs" REFFIELDS="graderid"/>
             </KEYS>
         </TABLE>
 

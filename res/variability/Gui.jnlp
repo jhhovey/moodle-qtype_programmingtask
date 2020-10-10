@@ -14,7 +14,7 @@
 	<resources>
 		<j2se version="1.8" />
 		<!-- edit the value of this property tag to set the url of the instantiating service -->
-		<property name="url" value="http://localhost:8080/GrajaVariability/rest/instantiate" />
+		<property name="url" value="http://localhost:8080/ProformaVariability/rest/instantiate" />
 		<jar href="VariabilityGui.jar"/>
 		<jar href="libvts.jar"/>
 		<jar href="Proforma.jar"/>
@@ -35,6 +35,8 @@
 		<jar href="extjar/jersey-media-multipart.jar"/>
 		<jar href="extjar/mimepull.jar"/>
 		<jar href="extjar/osgi-resource-locator.jar"/>
+		<jar href="extjar/xalan-2.7.2.jar"/>
+		<jar href="extjar/xercesImpl-2.12.0.jar"/>
 	</resources>
 	<application-desc main-class="org.proforma.variability.fx.gui.Gui" />
 </jnlp>

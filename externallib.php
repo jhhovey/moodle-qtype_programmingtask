@@ -136,7 +136,7 @@ class qtype_programmingtask_external extends external_api {
         $returnval = array();
         $doc = create_domdocument_from_task_xml($usercontext, $draftid, $filename);
         $namespace = detect_proforma_namespace($doc);
-        $returnval['istasktemplate'] = is_task_template($doc);
+        $returnval['istasktemplate'] = is_task_template($draftid, $usercontext);
 
         if ($namespace == null) {
 
