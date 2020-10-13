@@ -299,119 +299,13 @@ function save_task_and_according_files($question) {
 
     $filesfordb = array();
     $fs = get_file_storage();
-    $embeddedelems = array("embedded-bin-file", "embedded-txt-file");
-    $attachedelems = array("attached-bin-file", "attached-txt-file");
-    foreach ($doc->getElementsByTagNameNS($namespace, 'file') as $file) {
-        foreach ($file->childNodes as $child) {
-            $break = false;
-            if (in_array($child->localName, $embeddedelems)) {
-                $content = '';
-                if ($child->localName == 'embedded-bin-file') {
-                    $content = base64_decode($child->nodeValue);
-                } else {
-                    $content = $child->nodeValue;
-                }
-
-                // Compensate the fact that the filename might contain a relative path.
-                $pathinfo = pathinfo('/' . $file->attributes->getNamedItem('id')->nodeValue . '/' .
-                    $child->attributes->getNamedItem('filename')->nodeValue);
-
-                $fileinfo = array(
-                    'component' => 'question',
-                    'filearea' => PROFORMA_EMBEDDED_TASK_FILES_FILEAREA,
-                    'itemid' => $question->id,
-                    'contextid' => $question->context->id,
-                    'filepath' => $pathinfo['dirname'] . '/',
-                    'filename' => $pathinfo['basename']);
-                $fs->create_file_from_string($fileinfo, $content);
-
-                $record = new stdClass();
-                $record->questionid = $question->id;
-                $record->fileid = $file->attributes->getNamedItem('id')->nodeValue;
-                $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
-                $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
-                $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
-                    $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
-                $record->filepath = '/' . $file->attributes->getNamedItem('id')->nodeValue . '/';
-                $record->filename = $child->attributes->getNamedItem('filename')->nodeValue;
-                $record->filearea = PROFORMA_EMBEDDED_TASK_FILES_FILEAREA;
-                $filesfordb[] = $record;
-
-                $break = true;
-            } else if (in_array($child->localName, $attachedelems)) {
-
-                // The file itself has already been copied - now only add the database entry.
-
-                $pathinfo = pathinfo('/' . $child->nodeValue);
-                $record = new stdClass();
-                $record->questionid = $question->id;
-                $record->fileid = $file->attributes->getNamedItem('id')->nodeValue;
-                $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
-                $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
-                $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
-                    $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
-                $record->filepath = $pathinfo['dirname'] . '/';
-                $record->filename = $pathinfo['basename'];
-                $record->filearea = PROFORMA_ATTACHED_TASK_FILES_FILEAREA;
-                $filesfordb[] = $record;
-
-                $break = true;
-            }
-            if ($break) {
-                break;
-            }
-        }
-    }
-
-    // Now move the task xml file to the designated area.
-    $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
-        '/', 'task.xml');
-    $newfilerecord = array(
-        'component' => 'question',
-        'filearea' => PROFORMA_TASKXML_FILEAREA,
-        'itemid' => $question->id,
-        'contextid' => $question->context->id,
-        'filepath' => '/',
-        'filename' => 'task.xml');
-    $fs->create_file_from_storedfile($newfilerecord, $file);
-    $file->delete();
-
-    $record = new stdClass();
-    $record->questionid = $question->id;
-    $record->fileid = 'taskxml';
-    $record->usedbygrader = 0;
-    $record->visibletostudents = 0;
-    $record->usagebylms = 'download';
-    $record->filepath = '/';
-    $record->filename = 'task.xml';
-    $record->filearea = PROFORMA_TASKXML_FILEAREA;
-    $filesfordb[] = $record;
 
     // Now move the template xml file to the designated area.
     if ($fs->file_exists($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
         '/', 'tpl.xml')) {
         $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
             '/', 'tpl.xml');
-        $newfilerecord = array(
-            'component' => 'question',
-            'filearea' => PROFORMA_TEMPLATEXML_FILEAREA,
-            'itemid' => $question->id,
-            'contextid' => $question->context->id,
-            'filepath' => '/',
-            'filename' => 'tpl.xml');
-        $fs->create_file_from_storedfile($newfilerecord, $file);
         $file->delete();
-
-        $record = new stdClass();
-        $record->questionid = $question->id;
-        $record->fileid = 'templatexml';
-        $record->usedbygrader = 0;
-        $record->visibletostudents = 0;
-        $record->usagebylms = 'download';
-        $record->filepath = '/';
-        $record->filename = 'tpl.xml';
-        $record->filearea = PROFORMA_TEMPLATEXML_FILEAREA;
-        $filesfordb[] = $record;
         // Now move the template zip file to the designated area.
         $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
         $newfilerecord = array(
@@ -435,6 +329,94 @@ function save_task_and_according_files($question) {
         $record->filearea = PROFORMA_TEMPLATEZIP_FILEAREA;
         $filesfordb[] = $record;
     } else {
+        $embeddedelems = array("embedded-bin-file", "embedded-txt-file");
+        $attachedelems = array("attached-bin-file", "attached-txt-file");
+        foreach ($doc->getElementsByTagNameNS($namespace, 'file') as $file) {
+            foreach ($file->childNodes as $child) {
+                $break = false;
+                if (in_array($child->localName, $embeddedelems)) {
+                    $content = '';
+                    if ($child->localName == 'embedded-bin-file') {
+                        $content = base64_decode($child->nodeValue);
+                    } else {
+                        $content = $child->nodeValue;
+                    }
+
+                    // Compensate the fact that the filename might contain a relative path.
+                    $pathinfo = pathinfo('/' . $file->attributes->getNamedItem('id')->nodeValue . '/' .
+                        $child->attributes->getNamedItem('filename')->nodeValue);
+
+                    $fileinfo = array(
+                        'component' => 'question',
+                        'filearea' => PROFORMA_EMBEDDED_TASK_FILES_FILEAREA,
+                        'itemid' => $question->id,
+                        'contextid' => $question->context->id,
+                        'filepath' => $pathinfo['dirname'] . '/',
+                        'filename' => $pathinfo['basename']);
+                    $fs->create_file_from_string($fileinfo, $content);
+
+                    $record = new stdClass();
+                    $record->questionid = $question->id;
+                    $record->fileid = $file->attributes->getNamedItem('id')->nodeValue;
+                    $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
+                    $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
+                    $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
+                        $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
+                    $record->filepath = '/' . $file->attributes->getNamedItem('id')->nodeValue . '/';
+                    $record->filename = $child->attributes->getNamedItem('filename')->nodeValue;
+                    $record->filearea = PROFORMA_EMBEDDED_TASK_FILES_FILEAREA;
+                    $filesfordb[] = $record;
+
+                    $break = true;
+                } else if (in_array($child->localName, $attachedelems)) {
+
+                    // The file itself has already been copied - now only add the database entry.
+
+                    $pathinfo = pathinfo('/' . $child->nodeValue);
+                    $record = new stdClass();
+                    $record->questionid = $question->id;
+                    $record->fileid = $file->attributes->getNamedItem('id')->nodeValue;
+                    $record->usedbygrader = $file->attributes->getNamedItem('used-by-grader')->nodeValue == 'true' ? 1 : 0;
+                    $record->visibletostudents = $file->attributes->getNamedItem('visible')->nodeValue == 'true' ? 1 : 0;
+                    $record->usagebylms = $file->attributes->getNamedItem('usage-by-lms') != null ?
+                        $file->attributes->getNamedItem('usage-by-lms')->nodeValue : 'download';
+                    $record->filepath = $pathinfo['dirname'] . '/';
+                    $record->filename = $pathinfo['basename'];
+                    $record->filearea = PROFORMA_ATTACHED_TASK_FILES_FILEAREA;
+                    $filesfordb[] = $record;
+
+                    $break = true;
+                }
+                if ($break) {
+                    break;
+                }
+            }
+        }
+
+        // Now move the task xml file to the designated area.
+        $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id,
+            '/', 'task.xml');
+        $newfilerecord = array(
+            'component' => 'question',
+            'filearea' => PROFORMA_TASKXML_FILEAREA,
+            'itemid' => $question->id,
+            'contextid' => $question->context->id,
+            'filepath' => '/',
+            'filename' => 'task.xml');
+        $fs->create_file_from_storedfile($newfilerecord, $file);
+        $file->delete();
+
+        $record = new stdClass();
+        $record->questionid = $question->id;
+        $record->fileid = 'taskxml';
+        $record->usedbygrader = 0;
+        $record->visibletostudents = 0;
+        $record->usagebylms = 'download';
+        $record->filepath = '/';
+        $record->filename = 'task.xml';
+        $record->filearea = PROFORMA_TASKXML_FILEAREA;
+        $filesfordb[] = $record;
+
         // Now move the task zip file to the designated area.
         $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
         $newfilerecord = array(
