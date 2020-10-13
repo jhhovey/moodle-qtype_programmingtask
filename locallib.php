@@ -18,6 +18,7 @@ defined('MOODLE_INTERNAL') || die();
 
 // Name of file areas.
 define('PROFORMA_TASKZIP_FILEAREA', 'taskfile');
+define('PROFORMA_TEMPLATEZIP_FILEAREA', 'templatefile');
 define('PROFORMA_TASKXML_FILEAREA', 'taskxmlfile');
 define('PROFORMA_TEMPLATEXML_FILEAREA', 'templatexmlfile');
 define('PROFORMA_ATTACHED_TASK_FILES_FILEAREA', 'attachedtaskfiles');
@@ -411,30 +412,52 @@ function save_task_and_according_files($question) {
         $record->filename = 'tpl.xml';
         $record->filearea = PROFORMA_TEMPLATEXML_FILEAREA;
         $filesfordb[] = $record;
+        // Now move the template zip file to the designated area.
+        $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
+        $newfilerecord = array(
+            'component' => 'question',
+            'filearea' => PROFORMA_TEMPLATEZIP_FILEAREA,
+            'itemid' => $question->id,
+            'contextid' => $question->context->id,
+            'filepath' => '/',
+            'filename' => $filename);
+        $fs->create_file_from_storedfile($newfilerecord, $file);
+        $file->delete();
+
+        $record = new stdClass();
+        $record->questionid = $question->id;
+        $record->fileid = 'task';
+        $record->usedbygrader = 0;
+        $record->visibletostudents = 0;
+        $record->usagebylms = 'download';
+        $record->filepath = '/';
+        $record->filename = $filename;
+        $record->filearea = PROFORMA_TEMPLATEZIP_FILEAREA;
+        $filesfordb[] = $record;
+    } else {
+        // Now move the task zip file to the designated area.
+        $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
+        $newfilerecord = array(
+            'component' => 'question',
+            'filearea' => PROFORMA_TASKZIP_FILEAREA,
+            'itemid' => $question->id,
+            'contextid' => $question->context->id,
+            'filepath' => '/',
+            'filename' => $filename);
+        $fs->create_file_from_storedfile($newfilerecord, $file);
+        $file->delete();
+
+        $record = new stdClass();
+        $record->questionid = $question->id;
+        $record->fileid = 'task';
+        $record->usedbygrader = 0;
+        $record->visibletostudents = 0;
+        $record->usagebylms = 'download';
+        $record->filepath = '/';
+        $record->filename = $filename;
+        $record->filearea = PROFORMA_TASKZIP_FILEAREA;
+        $filesfordb[] = $record;
     }
-
-    // Now move the task zip file to the designated area.
-    $file = $fs->get_file($question->context->id, 'question', PROFORMA_ATTACHED_TASK_FILES_FILEAREA, $question->id, '/', $filename);
-    $newfilerecord = array(
-        'component' => 'question',
-        'filearea' => PROFORMA_TASKZIP_FILEAREA,
-        'itemid' => $question->id,
-        'contextid' => $question->context->id,
-        'filepath' => '/',
-        'filename' => $filename);
-    $fs->create_file_from_storedfile($newfilerecord, $file);
-    $file->delete();
-
-    $record = new stdClass();
-    $record->questionid = $question->id;
-    $record->fileid = 'task';
-    $record->usedbygrader = 0;
-    $record->visibletostudents = 0;
-    $record->usagebylms = 'download';
-    $record->filepath = '/';
-    $record->filename = $filename;
-    $record->filearea = PROFORMA_TASKZIP_FILEAREA;
-    $filesfordb[] = $record;
 
     $names = '';
     foreach($filesfordb as $file) {

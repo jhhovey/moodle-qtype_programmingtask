@@ -197,5 +197,31 @@ function xmldb_qtype_programmingtask_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020092400, 'qtype', 'programmingtask');
     }
 
+    if ($oldversion < 2020101200) {
+
+        $filestable = new xmldb_table('qtype_programmingtask_vfiles');
+        $filestable->addField(new xmldb_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, true));
+        $filestable->addField(new xmldb_field('questionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $filestable->addField(new xmldb_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL));
+        $filestable->addField(new xmldb_field('fileid', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, null));
+        $filestable->addField(new xmldb_field('usedbygrader', XMLDB_TYPE_INTEGER, 2, XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null));
+        $filestable->addField(new xmldb_field('visibletostudents', XMLDB_TYPE_INTEGER, 2,
+            XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null));
+        $filestable->addField(new xmldb_field('usagebylms', XMLDB_TYPE_CHAR, 64, null, XMLDB_NOTNULL, null, 'download'));
+        $filestable->addField(new xmldb_field('filepath', XMLDB_TYPE_TEXT, 'medium', null, XMLDB_NOTNULL, null, null));
+        $filestable->addField(new xmldb_field('filename', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, null));
+        $filestable->addField(new xmldb_field('filearea', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, null));
+
+        $filestable->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY, array('id')));
+        $filestable->addKey(new xmldb_key('questionid', XMLDB_KEY_FOREIGN, array('questionid'), 'question', 'id'));
+        $filestable->addKey(new xmldb_key('userid', XMLDB_KEY_FOREIGN, array('userid'), 'user', 'id'));
+        $filestable->addKey(new xmldb_key('joined_unique', XMLDB_KEY_FOREIGN, array('questionid', 'userid', 'fileid')));
+        $filestable->addIndex(new xmldb_index('fileid', XMLDB_INDEX_NOTUNIQUE, array('fileid')));
+        $dbman->create_table($filestable);
+
+        // ProForma savepoint reached.
+        upgrade_plugin_savepoint(true, 2020101200, 'qtype', 'programmingtask');
+    }
+
     return true;
 }

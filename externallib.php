@@ -75,19 +75,19 @@ class qtype_programmingtask_external extends external_api {
         $cvvp = $params['cvvp'];
         $task_template_record = $DB->get_record(
             'qtype_programmingtask_files',
-            array('questionid' => $questionid, 'filearea' => PROFORMA_TASKZIP_FILEAREA));
+            array('questionid' => $questionid, 'filearea' => PROFORMA_TEMPLATEZIP_FILEAREA));
         $fs = get_file_storage();
         $task_template = $fs->get_file(
             contextid,
             'question',
-            PROFORMA_TASKZIP_FILEAREA,
+            PROFORMA_TEMPLATEZIP_FILEAREA,
             $questionid,
             '/',
             $task_template_record->filename);
 
         $curl = new \curl();
         $task_instance = $curl->post(
-            "http://localhost:8080/GrajaVariability/rest/instantiate",
+            "http://localhost:8080/ProformaVariability/rest/instantiate",
             array('task' => $task_template, 'mode' => 'GIVEN', 'specs' => $cvvp));
         var_dump($task_instance);
     }

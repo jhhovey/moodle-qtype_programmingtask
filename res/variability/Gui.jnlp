@@ -3,7 +3,6 @@
 	<information>
 		<title>Variability Gui</title>
 		<vendor>Jovan Hovey</vendor>
-		<homepage href="http://localhost/graja" />
 		<description>
 			This Gui supports instantiating variable ProFormA tasks according to the user's specifications.
 		</description>
@@ -13,8 +12,6 @@
 	</security>
 	<resources>
 		<j2se version="1.8" />
-		<!-- edit the value of this property tag to set the url of the instantiating service -->
-		<property name="url" value="http://localhost:8080/ProformaVariability/rest/instantiate" />
 		<jar href="VariabilityGui.jar"/>
 		<jar href="libvts.jar"/>
 		<jar href="Proforma.jar"/>

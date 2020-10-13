@@ -46,6 +46,30 @@
             </INDEXES>
         </TABLE>
 
+        <TABLE NAME="qtype_programmingtask_vfiles" COMMENT="This table keeps information about the files that are contained in a question instance for variable programming tasks.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Foreign key references question.id"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Foreign key references user.id"/>
+                <FIELD NAME="fileid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="usedbygrader" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="visibletostudents" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="usagebylms" TYPE="char" LENGTH="64" NOTNULL="true" DEFAULT="download" SEQUENCE="false"/>
+                <FIELD NAME="filepath" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="filename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="filearea" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="questionid" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="joined_unique" TYPE="unique" FIELDS="questionid, userid, fileid"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="fileid" UNIQUE="false" FIELDS="fileid"/>
+            </INDEXES>
+        </TABLE>
+
         <TABLE NAME="qtype_programmingtask_gradrs" COMMENT="Contains infos about the graders.">
             <FIELDS>
                 <FIELD NAME="graderid" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false"/>

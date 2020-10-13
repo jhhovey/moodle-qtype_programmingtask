@@ -27,6 +27,7 @@ require_once(__DIR__ . '/../../locallib.php');
 
 use qtype_programmingtask\utility\proforma_xml\separate_feedback_handler;
 use qtype_programmingtask\output\separate_feedback_text_renderer;
+use qtype_programmingtask\utility\instantiator\ProformaInstantiator;
 
 /**
  * Generates the output for programmingtask questions.
@@ -47,14 +48,35 @@ class qtype_programmingtask_renderer extends qtype_renderer {
      * @return string HTML fragment.
      */
     public function formulation_and_controls(question_attempt $qa, question_display_options $options) {
-        global $DB, $PAGE;
-
-        $o = parent::formulation_and_controls($qa, $options);
+        global $DB, $PAGE, $USER;
 
         $question = $qa->get_question();
-        $qubaid = $qa->get_usage_id();
+        $attemptid = $qa->get_usage_id();
         $slot = $qa->get_slot();
         $questionid = $question->id;
+
+        if ($question->isvariabletask) {
+            $files = $DB->get_records(
+                'qtype_programmingtask_vfiles',
+                array(
+                    'questionid' => $questionid,
+                    'userid' => $USER->id));
+            if (empty($files)) {// && !has_capability('mod/quiz:grade', $PAGE->context)) {
+                $fileRecord = $DB->get_record(
+                    'qtype_programmingtask_files',
+                    array(
+                        'questionid' => $questionid,
+                        'filearea' => PROFORMA_TEMPLATEZIP_FILEAREA));
+                $fs = get_file_storage();
+                $files = $fs->get_area_files($question->contextid, 'question', $fileRecord->filearea);
+                //array_pop($files); // throw away '.' directory
+                $templateZip = array_pop($files);
+                $instantiator = new ProformaInstantiator();
+                $instanceZip = $instantiator->instantiate_random($templateZip);
+
+            } else {
+            }
+        }
 
         // Load ace scripts.
         $plugindirrel = '/question/type/programmingtask';
@@ -63,40 +85,11 @@ class qtype_programmingtask_renderer extends qtype_renderer {
         $PAGE->requires->js($plugindirrel . '/ace/ext-modelist.js');
         $PAGE->requires->js_call_amd('qtype_programmingtask/variability_gui', 'deployGui');
 
-        // If teacher, display test option for download.
-        if ($question->isvariabletask && has_capability('mod/quiz:grade', $PAGE->context)) {
-            $service = 'http://localhost:8080/GrajaVariability/rest/instantiate';
-            $file = $DB->get_record(
-                'qtype_programmingtask_files',
-                array(
-                    'questionid' => $questionid,
-                    'filearea' => PROFORMA_TASKZIP_FILEAREA));
-            $taskfileinfo = array(
-                'contextid' => $question->contextid,
-                'component' => 'question',
-                'filearea' => PROFORMA_TASKZIP_FILEAREA,
-                'itemid' => "{$qubaid}/$slot/{$questionid}",
-                'filepath' => $file->filepath,
-                'filename' => $file->filename);
-            $url = moodle_url::make_pluginfile_url($taskfileinfo['contextid'], $taskfileinfo['component'],
-                $taskfileinfo['filearea'], $taskfileinfo['itemid'], $taskfileinfo['filepath'],
-                $taskfileinfo['filename'], false);
+        $o = parent::formulation_and_controls($qa, $options);
 
-            $jnlp_url = get_jnlp_file_url() . '?service=' . rawurlencode($service) . '&question_id=' . $questionid;
-            $o .= "<form class='mform'>" .
-                "<div style='display: none;'>" .
-                "<input name='jnlpUrl' type='hidden' value='" . $jnlp_url . "'>" .
-                "<input name='serviceUrl' type='hidden' value='" . rawurlencode($service) . "'>" .
-                "<input name='questionId' type='hidden' value='" . $questionid . "'>" .
-                "<input name='taskTemplate' type='hidden' value='" . rawurlencode($url) . "'>" .
-                "</div>" .
-                "<button class='btn btn-secondary ml-0' name='testthetaskfilebutton' id='testthetaskfilebutton' type='button'>" .
-                "Download teacher client for {$file->filename}" .
-                "</button>" .
-                "</form>";
-            /*$o .= "<a href='$jnlp_url' style='display:block;text-align:right;'>" .
-                " <span style='font-family: FontAwesome; display:inline-block;" .
-                "margin-right: 5px'>&#xf019;</span>Download teacher client for '{$file->filename}'</a>";*/
+        // If teacher and question is variable proforma task, display download button for teacher client.
+        if ($question->isvariabletask && has_capability('mod/quiz:grade', $PAGE->context)) {
+            $o .= $this->render_teacher_client_download_button($DB, $questionid, $question, $attemptid, $slot);
         }
 
         if (empty($options->readonly)) {
@@ -518,5 +511,47 @@ class qtype_programmingtask_renderer extends qtype_renderer {
             }
         }
         return '';
+    }
+
+    /**
+     * @param $DB
+     * @param $questionid
+     * @param $question
+     * @param $qubaid
+     * @param $slot
+     * @return string
+     */
+    private function render_teacher_client_download_button($DB, $questionid, $question, $qubaid, $slot): string
+    {
+        $service = 'http://localhost:8080/ProformaVariability/rest/instantiate';
+        $file = $DB->get_record(
+            'qtype_programmingtask_files',
+            array(
+                'questionid' => $questionid,
+                'filearea' => PROFORMA_TEMPLATEZIP_FILEAREA));
+        $taskfileinfo = array(
+            'contextid' => $question->contextid,
+            'component' => 'question',
+            'filearea' => PROFORMA_TEMPLATEZIP_FILEAREA,
+            'itemid' => "{$qubaid}/$slot/{$questionid}",
+            'filepath' => $file->filepath,
+            'filename' => $file->filename);
+        $url = moodle_url::make_pluginfile_url($taskfileinfo['contextid'], $taskfileinfo['component'],
+            $taskfileinfo['filearea'], $taskfileinfo['itemid'], $taskfileinfo['filepath'],
+            $taskfileinfo['filename'], false);
+
+        $jnlp_url = get_jnlp_file_url() . '?service=' . rawurlencode($service) . '&question_id=' . $questionid;
+        $downloadButton = "<form class='mform'>" .
+            "<div style='display: none;'>" .
+            "<input name='jnlpUrl' type='hidden' value='" . $jnlp_url . "'>" .
+            "<input name='serviceUrl' type='hidden' value='" . rawurlencode($service) . "'>" .
+            "<input name='questionId' type='hidden' value='" . $questionid . "'>" .
+            "<input name='taskTemplate' type='hidden' value='" . rawurlencode($url) . "'>" .
+            "</div>" .
+            "<button class='btn btn-secondary ml-0' name='testthetaskfilebutton' id='testthetaskfilebutton' type='button'>" .
+            "Download teacher client to create task instance" .
+            "</button>" .
+            "</form>";
+        return $downloadButton;
     }
 }
