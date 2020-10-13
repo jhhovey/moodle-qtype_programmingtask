@@ -540,7 +540,7 @@ class qtype_programmingtask_renderer extends qtype_renderer {
             $taskfileinfo['filearea'], $taskfileinfo['itemid'], $taskfileinfo['filepath'],
             $taskfileinfo['filename'], false);
 
-        $jnlp_url = get_jnlp_file_url() . '?service=' . rawurlencode($service) . '&question_id=' . $questionid;
+        $jnlp_url = get_jnlp_file_url() . '?lms=moodle&service=' . rawurlencode($service) . '&question_id=' . $questionid;
         $downloadButton = "<form class='mform'>" .
             "<div style='display: none;'>" .
             "<input name='jnlpUrl' type='hidden' value='" . $jnlp_url . "'>" .
