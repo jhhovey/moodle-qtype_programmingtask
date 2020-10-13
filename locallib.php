@@ -20,7 +20,6 @@ defined('MOODLE_INTERNAL') || die();
 define('PROFORMA_TASKZIP_FILEAREA', 'taskfile');
 define('PROFORMA_TEMPLATEZIP_FILEAREA', 'templatefile');
 define('PROFORMA_TASKXML_FILEAREA', 'taskxmlfile');
-define('PROFORMA_TEMPLATEXML_FILEAREA', 'templatexmlfile');
 define('PROFORMA_ATTACHED_TASK_FILES_FILEAREA', 'attachedtaskfiles');
 define('PROFORMA_EMBEDDED_TASK_FILES_FILEAREA', 'embeddedtaskfiles');
 define('PROFORMA_SUBMISSION_ZIP_FILEAREA', 'submissionzip');
