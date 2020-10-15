@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="6.0+" codebase="http://localhost/graja">
+<jnlp spec="6.0+">
 	<information>
 		<title>Variability Gui</title>
 		<vendor>Jovan Hovey</vendor>

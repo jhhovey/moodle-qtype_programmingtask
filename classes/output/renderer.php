@@ -55,7 +55,7 @@ class qtype_programmingtask_renderer extends qtype_renderer {
         $slot = $qa->get_slot();
         $questionid = $question->id;
 
-        if ($question->isvariabletask) {
+        /*if ($question->isvariabletask && !has_capability('mod/quiz:grade', $PAGE->context)) {
             $files = $DB->get_records(
                 'qtype_programmingtask_vfiles',
                 array(
@@ -76,7 +76,7 @@ class qtype_programmingtask_renderer extends qtype_renderer {
 
             } else {
             }
-        }
+        }*/
 
         // Load ace scripts.
         $plugindirrel = '/question/type/programmingtask';
